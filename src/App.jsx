@@ -1,10 +1,12 @@
-import './App.css'
+import React from 'react';
+import GraphCanvas from './components/GraphCanvas';
 
-function App() {
-
+const App = () => {
   return (
-    <> </>
-  )
-}
+    <div>
+      <GraphCanvas />
+    </div>
+  );
+};
 
-export default App
+export default App;
