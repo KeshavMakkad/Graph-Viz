@@ -1,11 +1,15 @@
+// src/App.jsx
 import React from 'react';
-import GraphCanvas from './components/GraphCanvas';
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import GraphCanvas from './pages/GraphCanvas';
 
 const App = () => {
   return (
-    <div>
-      <GraphCanvas />
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/canvas" element={<GraphCanvas />} />
+    </Routes>
   );
 };
 

@@ -1,0 +1,31 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #f0f4f8;
+}
+
+.home-title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #1e3a8a;
+}
+
+.create-graph-button {
+  padding: 14px 32px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.create-graph-button:hover {
+  background-color: #1e40af;
+}

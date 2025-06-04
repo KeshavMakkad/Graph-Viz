@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import Node from './Node';
-import './../styles/components/GraphCanvas.css';
+import Node from './../components/Node';
+import './../styles/pages/GraphCanvas.css';
+import { useLocation } from 'react-router-dom';
 
 const GraphCanvas = () => {
+
+  const location = useLocation();
+  const { name, type } = location.state || { name: 'Untitled', type: 'unweighted-undirected' };
+
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [nextId, setNextId] = useState(1);
