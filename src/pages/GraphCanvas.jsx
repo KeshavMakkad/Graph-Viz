@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Node from "./../components/Node";
+import { BFS } from "./../algorithms/BFS";
+import { DFS } from "./../algorithms/DFS";
 import "./../styles/pages/GraphCanvas.css";
 import { useLocation } from "react-router-dom";
 
@@ -14,6 +16,8 @@ const GraphCanvas = () => {
   const [edges, setEdges] = useState([]);
   const [nextId, setNextId] = useState(1);
   const [selectedNodeId, setSelectedNodeId] = useState(undefined);
+  const [highlighted, setHighlighted] = useState([]);
+  const [algorithm, setAlgorithm] = useState("bfs");
 
   const handleAddNode = () => {
     const x = 100 + Math.random() * 400;
@@ -52,41 +56,64 @@ const GraphCanvas = () => {
 
   const handleNodeDrag = (id, newX, newY) => {
     setNodes((prev) =>
-      prev.map((node) => (node.id === id ? { ...node, x: newX, y: newY } : node))
+      prev.map((node) =>
+        node.id === id ? { ...node, x: newX, y: newY } : node
+      )
     );
+  };
+
+  const runAlgorithm = () => {
+    const bfsRunner = new BFS(nodes, edges, isDirected);
+    let result;
+
+    if (algorithm === "bfs") {
+      if (selectedNodeId === undefined) {
+        alert("Select a starting node.");
+        return;
+      }
+      result = bfsRunner.bfs(selectedNodeId);
+    } else if (algorithm === "multiBfs") {
+      result = bfsRunner.multiSourceBfs(nodes.map((n) => n.id)); // All as sources
+    } else if (algorithm === "zeroOneBfs") {
+      if (selectedNodeId === undefined) {
+        alert("Select a starting node.");
+        return;
+      }
+      const dist = bfsRunner.zeroOneBfs(selectedNodeId);
+      result = Array.from(dist.entries()).map(([nodeId, d]) => `${nodeId}: ${d}`);
+      alert("Distance:\n" + result.join("\n"));
+      return;
+    } else if (algorithm === "dfs") {
+        if (selectedNodeId === undefined) {
+            alert("Select a starting node.");
+            return;
+        }
+        const dfsRunner = new DFS(nodes, edges, isDirected);
+        result = dfsRunner.dfs(selectedNodeId);
+    }
+
+    setHighlighted(result);
   };
 
   const getNodeById = (id) => nodes.find((n) => n.id === id);
 
   return (
     <div>
-      <h2 style={{ margin: '10px' }}>{name}</h2>
-      <button
-        onClick={handleAddNode}
-        style={{
-          margin: "10px",
-          padding: "10px 20px",
-          fontWeight: "bold",
-          background: "#2563eb",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-        }}
-      >
-        ➕ Add Node
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "10px" }}>
+        <button onClick={handleAddNode}>➕ Add Node</button>
 
-      <div
-        className="graph-canvas"
-        style={{
-          width: "100%",
-          height: "90vh",
-          position: "relative",
-          background: "#f1f5f9",
-        }}
-      >
-        {/* Render Edges */}
+        <select value={algorithm} onChange={(e) => setAlgorithm(e.target.value)}>
+          <option value="bfs">BFS</option>
+          <option value="multiBfs">Multi-Source BFS</option>
+          <option value="zeroOneBfs">0-1 BFS</option>
+          <option value="dfs">DFS</option>
+
+        </select>
+
+        <button onClick={runAlgorithm}>▶️ Run</button>
+      </div>
+
+      <div className="graph-canvas">
         {edges.map((edge, i) => {
           const nodeA = getNodeById(edge.a);
           const nodeB = getNodeById(edge.b);
@@ -156,14 +183,14 @@ const GraphCanvas = () => {
           );
         })}
 
-        {/* Render Nodes */}
         {nodes.map((node) => (
           <Node
             key={node.id}
             {...node}
             onClick={handleNodeClick}
             onDrag={handleNodeDrag}
-            isSelected={selectedNodeId === node.id}
+            isSelected={node.id === selectedNodeId}
+            isHighlighted={highlighted.includes(node.id)}
           />
         ))}
       </div>
