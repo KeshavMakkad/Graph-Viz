@@ -9,8 +9,10 @@ const GraphCanvas = () => {
   const location = useLocation();
   const name = location.state?.name || "Untitled";
   const graphType = location.state?.type || "unweighted-undirected";
-  const isDirected = graphType.includes("directed");
-  const isWeighted = graphType.includes("weighted");
+  const [weightType, directionType] = graphType.split("-");
+  const isWeighted = weightType === "weighted";
+  const isDirected = directionType === "directed";
+
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -119,10 +121,10 @@ const GraphCanvas = () => {
           const nodeB = getNodeById(edge.b);
           if (!nodeA || !nodeB) return null;
 
-          const x1 = nodeA.x + 25;
-          const y1 = nodeA.y + 25;
-          const x2 = nodeB.x + 25;
-          const y2 = nodeB.y + 25;
+          const x1 = nodeA.x;
+          const y1 = nodeA.y;
+          const x2 = nodeB.x;
+          const y2 = nodeB.y;
 
           const length = Math.hypot(x2 - x1, y2 - y1);
           const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
@@ -139,7 +141,7 @@ const GraphCanvas = () => {
                   background: "#9ca3af",
                   transform: `rotate(${angle}deg)`,
                   transformOrigin: "0 0",
-                  zIndex: 1,
+                  zIndex: 0,
                 }}
               />
 
@@ -147,8 +149,8 @@ const GraphCanvas = () => {
                 <div
                   style={{
                     position: "absolute",
-                    left: `${x2 - 5}px`,
-                    top: `${y2 - 5}px`,
+                    left: `${x2 - 25}px`,
+                    top: `${y2 + 15}px`,
                     width: "0",
                     height: "0",
                     borderTop: "6px solid transparent",
@@ -156,12 +158,12 @@ const GraphCanvas = () => {
                     borderLeft: "10px solid #2563eb",
                     transform: `rotate(${angle}deg)`,
                     transformOrigin: "center",
-                    zIndex: 2,
+                    zIndex: 0,
                   }}
                 />
               )}
 
-              {edge.weight !== undefined && (
+              {isWeighted && edge.weight !== undefined && (
                 <div
                   style={{
                     position: "absolute",

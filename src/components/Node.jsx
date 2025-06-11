@@ -2,25 +2,36 @@ import React, { useRef } from 'react';
 import './../styles/components/Node.css';
 
 const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
-  const nodeRef = useRef(null);
   const isDragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
+  const canvasRef = useRef(null);
 
   const handleMouseDown = (e) => {
     e.stopPropagation();
     isDragging.current = true;
-    const rect = nodeRef.current.getBoundingClientRect();
+
+    const canvas = document.querySelector(".graph-canvas");
+    const canvasRect = canvas.getBoundingClientRect();
+
     offset.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - canvasRect.left - x,
+      y: e.clientY - canvasRect.top - y,
     };
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
 
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
-    onDrag(id, e.clientX - offset.current.x, e.clientY - offset.current.y);
+
+    const canvas = document.querySelector(".graph-canvas");
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const newX = e.clientX - canvasRect.left - offset.current.x;
+    const newY = e.clientY - canvasRect.top - offset.current.y;
+
+    onDrag(id, newX, newY);
   };
 
   const handleMouseUp = () => {
@@ -31,7 +42,7 @@ const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
 
   return (
     <div
-      ref={nodeRef}
+      ref={canvasRef}
       className={`graph-node ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlighted' : ''}`}
       style={{ left: `${x}px`, top: `${y}px` }}
       onMouseDown={handleMouseDown}
