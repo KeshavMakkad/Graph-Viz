@@ -118,4 +118,50 @@ export class BFS {
       pathFound
     };
   }
+  
+  countComponents() {
+    const visited = new Set();
+    let componentCount = 0;
+    const componentSizes = [];
+    const componentNodes = []; // Store nodes in each component
+    
+    // Iterate through all nodes
+    this.nodes.forEach(node => {
+      const nodeId = node.id;
+      
+      // If this node has not been visited yet, it's part of a new component
+      if (!visited.has(nodeId)) {
+        componentCount++;
+        let componentSize = 0;
+        const nodesInComponent = [];
+        
+        // Run BFS from this node
+        const queue = [nodeId];
+        visited.add(nodeId);
+        
+        while (queue.length > 0) {
+          const current = queue.shift();
+          componentSize++;
+          nodesInComponent.push(current);
+          
+          // Check all neighbors
+          this.adj[current].forEach(neighbor => {
+            if (!visited.has(neighbor)) {
+              visited.add(neighbor);
+              queue.push(neighbor);
+            }
+          });
+        }
+        
+        componentSizes.push(componentSize);
+        componentNodes.push(nodesInComponent);
+      }
+    });
+    
+    return {
+      count: componentCount,
+      sizes: componentSizes,
+      nodes: componentNodes
+    };
+  }
 }

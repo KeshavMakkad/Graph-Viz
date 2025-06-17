@@ -38,27 +38,30 @@
   animation: pulse 1s infinite alternate;
 }
 
-.graph-node.start-node {
-  background: #10b981; /* Green for start node */
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.9);
-  width: 60px;
-  height: 60px;
-  border: 3px solid #ffffff;
-  z-index: 10;
+/* Component visualization colors */
+.graph-node.component-0 {
+  background: #3b82f6; /* Blue */
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
 }
 
-.graph-node.end-node {
-  background: #ef4444; /* Red for end node */
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.9);
-  width: 60px;
-  height: 60px;
-  border: 3px solid #ffffff;
-  z-index: 10;
+.graph-node.component-1 {
+  background: #f97316; /* Orange */
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
 }
 
-.graph-node.path-node {
-  background: #a3e635; /* Light green for path nodes */
-  box-shadow: 0 0 8px rgba(163, 230, 53, 0.7);
+.graph-node.component-2 {
+  background: #8b5cf6; /* Purple */
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
+
+.graph-node.component-3 {
+  background: #ec4899; /* Pink */
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.6);
+}
+
+.graph-node.component-4 {
+  background: #10b981; /* Green */
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
 /* Styles for trace path */
