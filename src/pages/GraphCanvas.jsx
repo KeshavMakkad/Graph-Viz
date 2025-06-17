@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import Node from "./../components/Node";
-import { BFS } from "./../algorithms/BFS";
-import { DFS } from "./../algorithms/DFS";
-import "./../styles/pages/GraphCanvas.css";
+import { BFS } from "../algorithms/BFS";
 import { useLocation } from "react-router-dom";
+import "./../styles/pages/GraphCanvas.css";
 
 const GraphCanvas = () => {
   const location = useLocation();
@@ -13,13 +12,16 @@ const GraphCanvas = () => {
   const isWeighted = weightType === "weighted";
   const isDirected = directionType === "directed";
 
-
   const [nodes, setNodes] = useState([]);
+
   const [edges, setEdges] = useState([]);
+
   const [nextId, setNextId] = useState(1);
   const [selectedNodeId, setSelectedNodeId] = useState(undefined);
-  const [highlighted, setHighlighted] = useState([]);
-  const [algorithm, setAlgorithm] = useState("bfs");
+  const [steps, setSteps] = useState([]);
+
+  const [currentStepIdx, setCurrentStepIdx] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const handleAddNode = () => {
     const x = 100 + Math.random() * 400;
@@ -46,10 +48,8 @@ const GraphCanvas = () => {
           if (weight === null || isNaN(weight)) return;
           weight = Number(weight);
         }
-
         setEdges([...edges, { a, b, weight }]);
       }
-
       setSelectedNodeId(undefined);
     } else {
       setSelectedNodeId(id);
@@ -64,37 +64,44 @@ const GraphCanvas = () => {
     );
   };
 
-  const runAlgorithm = () => {
-    const bfsRunner = new BFS(nodes, edges, isDirected);
-    let result;
-
-    if (algorithm === "bfs") {
-      if (selectedNodeId === undefined) {
-        alert("Select a starting node.");
-        return;
-      }
-      result = bfsRunner.bfs(selectedNodeId);
-    } else if (algorithm === "multiBfs") {
-      result = bfsRunner.multiSourceBfs(nodes.map((n) => n.id)); // All as sources
-    } else if (algorithm === "zeroOneBfs") {
-      if (selectedNodeId === undefined) {
-        alert("Select a starting node.");
-        return;
-      }
-      const dist = bfsRunner.zeroOneBfs(selectedNodeId);
-      result = Array.from(dist.entries()).map(([nodeId, d]) => `${nodeId}: ${d}`);
-      alert("Distance:\n" + result.join("\n"));
+  const runBfs = () => {
+    if (selectedNodeId === undefined) {
+      alert("Select a starting node.");
       return;
-    } else if (algorithm === "dfs") {
-        if (selectedNodeId === undefined) {
-            alert("Select a starting node.");
-            return;
-        }
-        const dfsRunner = new DFS(nodes, edges, isDirected);
-        result = dfsRunner.dfs(selectedNodeId);
     }
+    const bfs = new BFS(nodes, edges, isDirected);
+    const s = bfs.bfsWithSteps(selectedNodeId);
+    setSteps(s);
+    setCurrentStepIdx(0);
+  };
 
-    setHighlighted(result);
+  const handleNextStep = () => {
+    if (currentStepIdx < steps.length - 1) {
+      setCurrentStepIdx(currentStepIdx + 1);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStepIdx > 0) {
+      setCurrentStepIdx(currentStepIdx - 1);
+    }
+  };
+
+  const handlePlayAll = () => {
+    if (steps.length <= 0) return;
+
+    setIsPlaying(true);
+    let idx = currentStepIdx;
+
+    const interval = setInterval(() => {
+      if (idx >= steps.length - 1) {
+        clearInterval(interval);
+        setIsPlaying(false);
+      } else {
+        idx++;
+        setCurrentStepIdx(idx);
+      }
+    }, 500);
   };
 
   const getNodeById = (id) => nodes.find((n) => n.id === id);
@@ -102,17 +109,21 @@ const GraphCanvas = () => {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "10px" }}>
-        <button onClick={handleAddNode}>➕ Add Node</button>
-
-        <select value={algorithm} onChange={(e) => setAlgorithm(e.target.value)}>
-          <option value="bfs">BFS</option>
-          <option value="multiBfs">Multi-Source BFS</option>
-          <option value="zeroOneBfs">0-1 BFS</option>
-          <option value="dfs">DFS</option>
-
-        </select>
-
-        <button onClick={runAlgorithm}>▶️ Run</button>
+        <button onClick={handleAddNode}>
+          ➕ Add Node
+        </button>
+        <button onClick={runBfs}>
+          ▶ Run BFS
+        </button>
+        <button onClick={handlePreviousStep}>
+          Prev
+        </button>
+        <button onClick={handleNextStep}>
+          Next
+        </button>
+        <button onClick={handlePlayAll}>
+          Play All
+        </button>
       </div>
 
       <div className="graph-canvas">
@@ -132,72 +143,46 @@ const GraphCanvas = () => {
           return (
             <React.Fragment key={i}>
               <div
-                style={{
-                  position: "absolute",
-                  left: `${x1}px`,
-                  top: `${y1}px`,
-                  width: `${length}px`,
-                  height: "2px",
-                  background: "#9ca3af",
-                  transform: `rotate(${angle}deg)`,
-                  transformOrigin: "0 0",
-                  zIndex: 0,
-                }}
-              />
-
-              {isDirected && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: `${x2 - 25}px`,
-                    top: `${y2 + 15}px`,
-                    width: "0",
-                    height: "0",
-                    borderTop: "6px solid transparent",
-                    borderBottom: "6px solid transparent",
-                    borderLeft: "10px solid #2563eb",
-                    transform: `rotate(${angle}deg)`,
-                    transformOrigin: "center",
-                    zIndex: 0,
-                  }}
-                />
-              )}
-
-              {isWeighted && edge.weight !== undefined && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: `${(x1 + x2) / 2}px`,
-                    top: `${(y1 + y2) / 2}px`,
-                    transform: "translate(-50%, -50%)",
-                    background: "#facc15",
-                    padding: "2px 6px",
-                    borderRadius: "6px",
-                    fontWeight: "bold",
-                    fontSize: "0.8rem",
-                    zIndex: 3,
-                  }}
-                >
-                  {edge.weight}
-                </div>
-              )}
+                style={{ position:'absolute',
+                   left: `${x1}px`,
+                   top: `${y1}px`,
+                   width: `${length}px`,
+                   height:'2px',
+                   background:'#9ca3af',
+                   transform: `rotate(${angle}deg)`,
+                   transformOrigin:'0 0',
+                   zIndex:'0'
+                 }}
+               />
             </React.Fragment>
-          );
+          )
         })}
 
         {nodes.map((node) => (
           <Node
             key={node.id}
-            {...node}
+            id={node.id}
+            x={node.x}
+            y={node.y}
             onClick={handleNodeClick}
             onDrag={handleNodeDrag}
             isSelected={node.id === selectedNodeId}
-            isHighlighted={highlighted.includes(node.id)}
+            isHighlighted={
+              steps.length > 0 &&
+              steps[currentStepIdx]?.current === node.id
+            }
           />
         ))}
       </div>
+
+      {steps.length > 0 && (
+        <div style={{ margin: "10px" }}>
+          <div>Current BFS queue: {steps[currentStepIdx]?.queue?.join(", ")}</div>
+        </div>
+      )}
+
     </div>
-  );
+  )
 };
 
 export default GraphCanvas;

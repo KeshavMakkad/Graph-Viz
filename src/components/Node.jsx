@@ -1,10 +1,9 @@
-import React, { useRef } from 'react';
-import './../styles/components/Node.css';
+import React, { useRef } from "react";
+import "./../styles/components/Node.css";
 
 const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
   const isDragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
-  const canvasRef = useRef(null);
 
   const handleMouseDown = (e) => {
     e.stopPropagation();
@@ -17,9 +16,8 @@ const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
       x: e.clientX - canvasRect.left - x,
       y: e.clientY - canvasRect.top - y,
     };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   const handleMouseMove = (e) => {
@@ -36,14 +34,15 @@ const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
 
   const handleMouseUp = () => {
     isDragging.current = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
   };
 
   return (
     <div
-      ref={canvasRef}
-      className={`graph-node ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlighted' : ''}`}
+      className={`graph-node ${isSelected ? "selected" : ""} ${
+        isHighlighted ? "highlighted" : ""
+      }`}
       style={{ left: `${x}px`, top: `${y}px` }}
       onMouseDown={handleMouseDown}
       onClick={(e) => {
@@ -53,7 +52,7 @@ const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
     >
       {id}
     </div>
-  );
+  )
 };
 
 export default Node;
