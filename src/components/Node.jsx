@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import "./../styles/components/Node.css";
 
-const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
+const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted, nodeType }) => {
   const isDragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
@@ -42,7 +42,7 @@ const Node = ({ id, x, y, onClick, onDrag, isSelected, isHighlighted }) => {
     <div
       className={`graph-node ${isSelected ? "selected" : ""} ${
         isHighlighted ? "highlighted" : ""
-      }`}
+      } ${nodeType ? nodeType : ""}`}
       style={{ left: `${x}px`, top: `${y}px` }}
       onMouseDown={handleMouseDown}
       onClick={(e) => {
