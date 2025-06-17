@@ -3,6 +3,7 @@ import Node from "./../components/Node";
 import { BFS } from "../algorithms/BFS";
 import { useLocation } from "react-router-dom";
 import "./../styles/pages/GraphCanvas.css";
+import { getTestGraph } from "../utils/testGraph";
 
 const AlgorithmTrace = ({ currentStep, startNode, endNode, path, isCompleted, functionType, result }) => {
   if (!currentStep) return null;
@@ -173,7 +174,30 @@ const GraphCanvas = () => {
   const [endNodeId, setEndNodeId] = useState(null);
   const [path, setPath] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isDev, setIsDev] = useState(false);
+  const [visualFunction, setVisualFunction] = useState("traversal");
 
+  useEffect(() => {
+    // Check if we're in dev mode
+    const mode = import.meta.env.VITE_MODE || 'production';
+    setIsDev(mode === 'dev');
+    
+    // Load test graph if in dev mode
+    if (mode === 'dev') {
+      handleLoadTestGraph();
+    }
+  }, []);
+
+  // Handler to load test graph
+  const handleLoadTestGraph = () => {
+    const { nodes: testNodes, edges: testEdges } = getTestGraph();
+    setNodes(testNodes);
+    setEdges(testEdges);
+    // Set nextId to be one more than the highest node id
+    const maxId = Math.max(...testNodes.map(node => node.id));
+    setNextId(maxId + 1);
+  };
+  
   const handleAddNode = () => {
     const x = 100 + Math.random() * 400;
     const y = 100 + Math.random() * 400;
@@ -413,8 +437,69 @@ const GraphCanvas = () => {
 
   const getNodeById = (id) => nodes.find((n) => n.id === id);
 
+  const handleClearGraph = () => {
+    setNodes([]);
+    setEdges([]);
+    setNextId(1);
+    setSteps([]);
+    setCurrentStepIdx(0);
+    setSelectedNodeId(undefined);
+    if (typeof setSecondNodeId === 'function') {
+      setSecondNodeId(null);
+    }
+    if (typeof setPathResults === 'function') {
+      setPathResults(null);
+    }
+    if (typeof setShowComponents === 'function') {
+      setShowComponents(false);
+    }
+    if (typeof setComponentSteps === 'function') {
+      setComponentSteps([]);
+    }
+  };
+  
   return (
     <div>
+      {isDev && (
+        <div style={{ 
+          backgroundColor: '#f8f9fa', 
+          padding: '10px', 
+          borderRadius: '8px',
+          marginBottom: '10px',
+          border: '1px solid #ddd'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Test Controls</div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={handleLoadTestGraph}
+              style={{ 
+                backgroundColor: '#28a745', 
+                color: 'white', 
+                border: 'none', 
+                padding: '5px 10px', 
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Load Test Graph
+            </button>
+            <button 
+              onClick={handleClearGraph}
+              style={{ 
+                backgroundColor: '#dc3545', 
+                color: 'white', 
+                border: 'none', 
+                padding: '5px 10px', 
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Delete Graph
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Graph creation controls */}
       <div
         style={{
