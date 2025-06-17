@@ -1,84 +1,39 @@
-import { buildAdjList } from '../utils/buildAdjList';
-
 export class BFS {
-  constructor(nodes, edges, directed = false) {
+  constructor(nodes, edges, isDirected = false) {
     this.nodes = nodes;
     this.edges = edges;
-    this.directed = directed;
-    this.adj = buildAdjList(nodes, edges, directed);
+    this.isDirected = isDirected;
+    this.adj = {};
+
+    this.nodes.forEach((node) => {
+      this.adj[node.id] = [];
+
+    });
+
+    this.edges.forEach((edge) => {
+      this.adj[edge.a].push(edge.b);
+      if (!this.isDirected) this.adj[edge.b].push(edge.a);
+    });
   }
 
-  // Standard BFS from a single source
-  bfs(startId) {
-    const visited = new Set();
-    const order = [];
-    const queue = [startId];
+  bfsWithSteps(start) {
+    const queue = [start];
+    const visited = new Set([start]);
+    const steps = [];
 
     while (queue.length > 0) {
-      const node = queue.shift();
-      if (visited.has(node)) continue;
-      visited.add(node);
-      order.push(node);
+      const current = queue.shift();
 
-      for (const neighbor of this.adj.get(node)) {
-        if (!visited.has(neighbor.node)) {
-          queue.push(neighbor.node);
-        }
-      }
+      // children = neighbors not visited
+      const children = this.adj[current].filter((n) => !visited.has(n));
+
+      steps.push({ current, children });
+
+      children.forEach((child) => {
+        visited.add(child);
+        queue.push(child);
+      });
     }
-
-    return order;
-  }
-
-  // Multi-source BFS
-  multiSourceBfs(sourceIds) {
-    const visited = new Set();
-    const order = [];
-    const queue = [...sourceIds];
-
-    while (queue.length > 0) {
-      const node = queue.shift();
-      if (visited.has(node)) continue;
-      visited.add(node);
-      order.push(node);
-
-      for (const neighbor of this.adj.get(node)) {
-        if (!visited.has(neighbor.node)) {
-          queue.push(neighbor.node);
-        }
-      }
-    }
-
-    return order;
-  }
-
-  // 0-1 BFS using deque
-  zeroOneBfs(startId) {
-    const dist = new Map();
-    this.nodes.forEach(node => dist.set(node.id, Infinity));
-    dist.set(startId, 0);
-
-    const deque = [];
-    deque.push(startId);
-
-    while (deque.length > 0) {
-      const u = deque.shift();
-
-      for (const { node: v, weight } of this.adj.get(u)) {
-        const w = weight ?? 1;
-        const alt = dist.get(u) + w;
-
-        if (alt < dist.get(v)) {
-          dist.set(v, alt);
-          if (w === 0) {
-            deque.unshift(v); // push to front
-          } else {
-            deque.push(v); // push to back
-          }
-        }
-      }
-    }
-
-    return dist;
+    return steps;
   }
 }

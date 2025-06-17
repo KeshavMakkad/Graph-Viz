@@ -20,3 +20,8 @@
   border: 3px solid #facc15;
   background: #1d4ed8;
 }
+
+.graph-node.highlighted {
+  background: #ffcc5b;
+  transition: background 0.5s ease;
+}
