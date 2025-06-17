@@ -15,3 +15,140 @@
   pointer-events: none;
   z-index: 1;
 }
+
+/* Queue Display Styles */
+.queue-display {
+  background: #ffffff;
+  border: 2px solid #4b5563;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0 10px 15px 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.queue-display h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 5px;
+}
+
+.queue-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 50px;
+  align-items: center;
+}
+
+.queue-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.queue-item.newly-added {
+  background: #f97316;
+  animation: pulse-queue 1s infinite alternate;
+}
+
+.queue-empty {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+@keyframes pulse-queue {
+  from {
+    box-shadow: 0 0 5px rgba(249, 115, 22, 0.5);
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.9);
+    transform: scale(1.1);
+  }
+}
+
+/* Algorithm Visualization Styles */
+.algorithm-visualization {
+  display: flex;
+  margin: 0 10px 15px 10px;
+  gap: 15px;
+}
+
+.algorithm-trace {
+  background: #ffffff;
+  border: 2px solid #4b5563;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+.algorithm-trace h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 5px;
+}
+
+.trace-step {
+  margin-bottom: 8px;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.trace-step strong {
+  color: #4b5563;
+}
+
+/* Component visualization styles */
+.trace-result {
+  padding: 10px;
+  background: #f0f9ff;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  border-left: 4px solid #3b82f6;
+}
+
+.component-count {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #1e40af;
+}
+
+.component-sizes {
+  font-size: 0.9em;
+  color: #1e3a8a;
+}
+
+.component-indicator {
+  background-color: #f1f5f9;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.current-component {
+  font-weight: bold;
+  color: #1e3a8a;
+}
+
+.component-nodes {
+  padding: 8px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.nodes-in-component {
+  font-size: 0.9em;
+}
