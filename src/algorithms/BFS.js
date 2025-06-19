@@ -165,3 +165,141 @@ export class BFS {
     };
   }
 }
+
+/**
+ * DFS with visualization steps for connected components
+ * @param {Array} nodes - Array of node objects
+ * @param {Array} edges - Array of edge objects
+ * @param {boolean} isDirected - Whether the graph is directed
+ * @returns {Object} Object with steps and component info
+ */
+export function dfsComponentsWithVisualization(nodes, edges, isDirected) {
+  // ...existing code...
+}
+
+/**
+ * BFS with visualization steps for connected components
+ * @returns {Object} Object with steps and component info
+ */
+BFS.prototype.bfsComponentsWithVisualization = function() {
+  const visited = new Set();
+  const components = [];
+  const allSteps = [];
+  let componentIndex = 0;
+  
+  // Initial state
+  allSteps.push({
+    type: 'init',
+    visited: new Set(),
+    component: null,
+    componentIndex: -1,
+    stack: [],
+    queue: [],
+    current: null,
+    visitedInComponent: new Set()
+  });
+  
+  for (const node of this.nodes) {
+    const nodeId = node.id;
+    
+    if (!visited.has(nodeId)) {
+      // Start a new component
+      const component = [];
+      
+      // Add step to show new component start
+      allSteps.push({
+        type: 'start-component',
+        visited: new Set([...visited]),
+        component: componentIndex + 1,
+        componentIndex: componentIndex,
+        stack: [], // For compatibility with DFS
+        queue: [nodeId],
+        current: null,
+        visitedInComponent: new Set()
+      });
+      
+      // Initialize BFS for this component
+      const queue = [nodeId];
+      
+      // Process this component with BFS
+      while (queue.length > 0) {
+        const current = queue.shift(); // Take from front of queue
+        
+        if (visited.has(current)) {
+          // Skip already visited nodes
+          continue;
+        }
+        
+        // Visit this node
+        visited.add(current);
+        component.push(current);
+        
+        // Get all neighbors
+        const neighbors = [];
+        const nodeNeighbors = this.adj[current] || [];
+        for (const neighbor of nodeNeighbors) {
+          if (!visited.has(neighbor)) {
+            neighbors.push(neighbor);
+          }
+        }
+        
+        // Add step to show node being processed
+        allSteps.push({
+          type: 'visit',
+          visited: new Set([...visited]),
+          component: componentIndex + 1,
+          componentIndex: componentIndex,
+          stack: [], // For compatibility with DFS
+          queue: [...queue],
+          current: current,
+          children: [...neighbors],
+          visitedInComponent: new Set([...component])
+        });
+        
+        // Add unvisited neighbors to queue
+        for (const neighbor of neighbors) {
+          if (!visited.has(neighbor)) {
+            queue.push(neighbor);
+          }
+        }
+        
+        // If we have neighbors to process, show the updated queue
+        if (neighbors.length > 0) {
+          allSteps.push({
+            type: 'queue-update',
+            visited: new Set([...visited]),
+            component: componentIndex + 1,
+            componentIndex: componentIndex,
+            stack: [], // For compatibility with DFS
+            queue: [...queue],
+            current: current,
+            children: [...neighbors],
+            newAdditions: [...neighbors],
+            visitedInComponent: new Set([...component])
+          });
+        }
+      }
+      
+      // Component complete
+      allSteps.push({
+        type: 'complete-component',
+        visited: new Set([...visited]),
+        component: componentIndex + 1,
+        componentIndex: componentIndex,
+        stack: [],
+        queue: [],
+        current: null,
+        visitedInComponent: new Set([...component])
+      });
+      
+      components.push(component);
+      componentIndex++;
+    }
+  }
+  
+  return {
+    steps: allSteps,
+    components: components,
+    count: components.length
+  };
+};
