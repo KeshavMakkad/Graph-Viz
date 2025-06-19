@@ -4,7 +4,7 @@ import { BFS } from "../algorithms/BFS";
 import { DFS } from "../algorithms/DFS";
 import { useLocation } from "react-router-dom";
 import "./../styles/pages/GraphCanvas.css";
-import { getTestGraph } from "../utils/testGraph";
+import { getTestGraph, getDirectedTestGraph } from "../utils/testGraph";
 
 const GraphCanvas = () => {
   const location = useLocation();
@@ -81,6 +81,23 @@ const GraphCanvas = () => {
     // Set nextId to be one more than the highest node id
     const maxId = Math.max(...testNodes.map(node => node.id));
     setNextId(maxId + 1);
+  };
+  
+  // Handler to load directed test graph
+  const handleLoadDirectedTestGraph = () => {
+    const { nodes: testNodes, edges: testEdges } = getDirectedTestGraph();
+    setNodes(testNodes);
+    setEdges(testEdges);
+    // Set nextId to be one more than the highest node id
+    const maxId = Math.max(...testNodes.map(node => node.id));
+    setNextId(maxId + 1);
+    
+    // Make sure we're in directed mode
+    const graphTypeParts = graphType.split("-");
+    if (graphTypeParts[1] !== "directed") {
+      // Update to appropriate directed mode
+      setGraphType(`${graphTypeParts[0]}-directed`);
+    }
   };
   
   const handleAddNode = () => {
@@ -393,7 +410,10 @@ const GraphCanvas = () => {
           <div className="dev-header">Test Controls</div>
           <div className="dev-buttons">
             <button onClick={handleLoadTestGraph} className="dev-btn load-btn">
-              Load Test Graph
+              Load Undirected Graph
+            </button>
+            <button onClick={handleLoadDirectedTestGraph} className="dev-btn load-directed-btn">
+              Load Directed Graph
             </button>
             <button onClick={handleClearGraph} className="dev-btn clear-btn">
               Delete Graph
@@ -416,6 +436,7 @@ const GraphCanvas = () => {
               const x2 = nodeB.x;
               const y2 = nodeB.y;
 
+              // Calculate the edge length and angle
               const length = Math.hypot(x2 - x1, y2 - y1);
               const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
 
@@ -428,8 +449,21 @@ const GraphCanvas = () => {
                        (!isDirected && edge.a === nextId && edge.b === currentId);
               });
               
+              // Calculate indicator position with better centering
+              const nodeRadius = 25; // Half of node width
+              const indicatorOffset = nodeRadius + 5; // Add 5px extra space
+              const totalLength = Math.hypot(x2 - x1, y2 - y1);
+              const indicatorPosition = 1 - (indicatorOffset / totalLength);
+
+              // Calculate exact position on the line
+              const cosAngle = (x2 - x1) / totalLength;
+              const sinAngle = (y2 - y1) / totalLength;
+              const indicatorX = x1 + (totalLength - indicatorOffset) * cosAngle;
+              const indicatorY = y1 + (totalLength - indicatorOffset) * sinAngle;
+              
               return (
                 <React.Fragment key={i}>
+                  {/* Main edge line */}
                   <div
                     style={{
                       position: "absolute",
@@ -444,6 +478,39 @@ const GraphCanvas = () => {
                       boxShadow: isPathEdge ? "0 0 10px rgba(34, 197, 94, 0.6)" : "none",
                     }}
                   />
+                  
+                  {/* Single direction indicator for directed graphs */}
+                  {isDirected && (
+                    <div 
+                      className={`edge-arrow ${isPathEdge ? 'path-edge' : ''}`}
+                      style={{
+                        position: "absolute",
+                        left: `${indicatorX}px`,
+                        top: `${indicatorY}px`,
+                        transform: `translate(-50%, -50%) rotate(${angle}deg)`, // Center using translate
+                      }}
+                    />
+                  )}
+                  
+                  {/* Weight label if needed */}
+                  {isWeighted && edge.weight !== undefined && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: `${x1 + (x2 - x1) * 0.5}px`,
+                        top: `${y1 + (y2 - y1) * 0.5}px`,
+                        background: "white",
+                        padding: "2px 5px",
+                        borderRadius: "10px",
+                        fontSize: "12px",
+                        transform: "translate(-50%, -50%)",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                        zIndex: 1,
+                      }}
+                    >
+                      {edge.weight}
+                    </div>
+                  )}
                 </React.Fragment>
               );
             })}
