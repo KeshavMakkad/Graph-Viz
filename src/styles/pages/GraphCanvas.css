@@ -611,6 +611,15 @@
   color: white;
 }
 
+.load-random-btn {
+  background-color: #8b5cf6; /* Purple */
+  color: white;
+}
+
+.load-random-btn:hover:not(:disabled) {
+  background-color: #7c3aed;
+}
+
 /* Directed graph arrows - Simple clean design */
 .edge-arrow {
   position: absolute;

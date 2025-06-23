@@ -6,6 +6,7 @@ import { TopoSort } from "../algorithms/TopoSort"; // Add this import
 import { useLocation } from "react-router-dom";
 import "./../styles/pages/GraphCanvas.css";
 import { getTestGraph, getDirectedTestGraph, getTopoSortTestGraph, getTopoSortCyclicTestGraph } from "../utils/testGraph";
+import { getRandomGraph } from "../utils/loadGraph";
 
 const GraphCanvas = () => {
   const location = useLocation();
@@ -522,6 +523,20 @@ const GraphCanvas = () => {
     }
   };
 
+  // Add this handler function for loading a random graph
+  const handleLoadRandomGraph = () => {
+    // Get random graph based on current direction type
+    const randomGraph = getRandomGraph(directionType);
+    
+    // Update the graph state
+    setNodes(randomGraph.nodes);
+    setEdges(randomGraph.edges);
+    
+    // Set nextId to be one more than the highest node id
+    const maxId = Math.max(...randomGraph.nodes.map(node => node.id));
+    setNextId(maxId + 1);
+  };
+
   return (
     <div className={`graph-page-container ${deleteMode ? 'delete-mode' : ''}`}>
       {isDev && (
@@ -762,6 +777,9 @@ const GraphCanvas = () => {
                   className={`control-btn ${deleteMode ? 'active-mode' : ''}`}
                 >
                   {deleteMode ? '✓ Delete Mode' : '🗑️ Delete Node'}
+                </button>
+                <button onClick={handleLoadRandomGraph} disabled={isRunning} className="control-btn load-random-btn">
+                  🎲 Load Random Graph
                 </button>
                 <button onClick={handleClearGraph} disabled={isRunning} className="control-btn clear-btn">
                   🗑️ Clear Graph
