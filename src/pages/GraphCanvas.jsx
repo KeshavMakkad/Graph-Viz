@@ -37,8 +37,10 @@ const GraphCanvas = () => {
   const [result, setResult] = useState(null); // For storing results like component count
 
   const [nodes, setNodes] = useState([]);
-
   const [edges, setEdges] = useState([]);
+  
+  // Add the missing deleteMode state
+  const [deleteMode, setDeleteMode] = useState(false);
 
   const [nextId, setNextId] = useState(1);
   const [selectedNodeId, setSelectedNodeId] = useState(undefined);
@@ -108,6 +110,15 @@ const GraphCanvas = () => {
   };
 
   const handleNodeClick = (id) => {
+    // If in delete mode, delete the node
+    if (deleteMode) {
+      // Remove the node
+      setNodes(nodes.filter(node => node.id !== id));
+      // Remove any edges connected to this node
+      setEdges(edges.filter(edge => edge.a !== id && edge.b !== id));
+      return;
+    }
+    
     // If we're selecting nodes for BFS, skip edge creation mode
     if (isRunning) {
       return;
@@ -403,8 +414,17 @@ const GraphCanvas = () => {
     }));
   };
   
+  // Toggle delete mode
+  const toggleDeleteMode = () => {
+    setDeleteMode(!deleteMode);
+    // When enabling delete mode, deselect any selected node
+    if (!deleteMode) {
+      setSelectedNodeId(undefined);
+    }
+  };
+
   return (
-    <div className="graph-page-container">
+    <div className={`graph-page-container ${deleteMode ? 'delete-mode' : ''}`}>
       {isDev && (
         <div className="dev-controls">
           <div className="dev-header">Test Controls</div>
@@ -602,8 +622,15 @@ const GraphCanvas = () => {
             
             {visibleSections.graphControls && (
               <div className="control-group">
-                <button onClick={handleAddNode} disabled={isRunning} className="control-btn">
+                <button onClick={handleAddNode} disabled={isRunning || deleteMode} className="control-btn">
                   ➕ Add Node
+                </button>
+                <button 
+                  onClick={toggleDeleteMode} 
+                  disabled={isRunning} 
+                  className={`control-btn ${deleteMode ? 'active-mode' : ''}`}
+                >
+                  {deleteMode ? '✓ Delete Mode' : '🗑️ Delete Node'}
                 </button>
                 <button onClick={handleClearGraph} disabled={isRunning} className="control-btn clear-btn">
                   🗑️ Clear Graph
