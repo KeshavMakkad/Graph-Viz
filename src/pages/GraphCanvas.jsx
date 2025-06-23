@@ -539,6 +539,26 @@ const GraphCanvas = () => {
 
   return (
     <div className={`graph-page-container ${deleteMode ? 'delete-mode' : ''}`}>
+      {/* Add Graph Info Header */}
+      <div className="graph-info-header">
+        <div className="graph-title-section">
+          <h1 className="graph-title">{name}</h1>
+          <span className="graph-type-badge">
+            {isWeighted ? "Weighted" : "Unweighted"} {isDirected ? "Directed" : "Undirected"} Graph
+          </span>
+        </div>
+        <div className="graph-stats">
+          <div className="stat-item">
+            <span className="stat-value">{nodes.length}</span>
+            <span className="stat-label">Nodes</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">{edges.length}</span>
+            <span className="stat-label">Edges</span>
+          </div>
+        </div>
+      </div>
+      
       {isDev && (
         <div className="dev-controls">
           <div className="dev-header">Test Controls</div>

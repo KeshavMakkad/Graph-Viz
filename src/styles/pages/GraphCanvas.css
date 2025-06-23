@@ -47,7 +47,7 @@ body, button, input, select, textarea {
 
 .graph-layout {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 120px); /* Adjusted from 60px to account for the new header */
   overflow: hidden;
 }
 
@@ -1776,5 +1776,59 @@ body, button, input, select, textarea {
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Graph Info Header Styles */
+.graph-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.graph-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.graph-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.graph-type-badge {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.graph-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #64748b;
 }
 
