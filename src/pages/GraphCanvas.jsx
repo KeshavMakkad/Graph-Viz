@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import Node from "./../components/Node";
 import { BFS } from "../algorithms/BFS";
 import { DFS } from "../algorithms/DFS";
+import { TopoSort } from "../algorithms/TopoSort"; // Add this import
 import { useLocation } from "react-router-dom";
 import "./../styles/pages/GraphCanvas.css";
-import { getTestGraph, getDirectedTestGraph } from "../utils/testGraph";
+import { getTestGraph, getDirectedTestGraph, getTopoSortTestGraph, getTopoSortCyclicTestGraph } from "../utils/testGraph";
 
 const GraphCanvas = () => {
   const location = useLocation();
@@ -14,13 +15,14 @@ const GraphCanvas = () => {
   const isWeighted = weightType === "weighted";
   const isDirected = directionType === "directed";
 
-  // Available function types
+  // Update available function types with topo sort
   const graphFunctions = [
     { id: "shortestPath", label: "Find Shortest Path" },
-    { id: "countComponents", label: "Count Connected Components" }
+    { id: "countComponents", label: "Count Connected Components" },
+    { id: "topoSort", label: "Topological Sort" }  // Add topological sort option
   ];
   
-  // Available algorithm types
+  // Update available algorithm types
   const graphAlgorithms = {
     "shortestPath": [
       { id: "bfs", label: "Breadth-First Search (BFS)" }
@@ -28,6 +30,9 @@ const GraphCanvas = () => {
     "countComponents": [
       { id: "bfs", label: "Breadth-First Search (BFS)" },
       { id: "dfs", label: "Depth-First Search (DFS)" }
+    ],
+    "topoSort": [
+      { id: "khan", label: "Khan's Algorithm" }  // Changed from DFS to Khan's Algorithm
     ]
   };
 
@@ -64,6 +69,11 @@ const GraphCanvas = () => {
     algorithmAnalysis: true
   });
   
+  // Add state for cycle detection
+  const [hasCycle, setHasCycle] = useState(false);
+  const [cycles, setCycles] = useState([]);
+  const [topoOrder, setTopoOrder] = useState([]);
+
   useEffect(() => {
     // Check if we're in dev mode
     const mode = import.meta.env.VITE_MODE || 'production';
@@ -88,6 +98,39 @@ const GraphCanvas = () => {
   // Handler to load directed test graph
   const handleLoadDirectedTestGraph = () => {
     const { nodes: testNodes, edges: testEdges } = getDirectedTestGraph();
+    setNodes(testNodes);
+    setEdges(testEdges);
+    // Set nextId to be one more than the highest node id
+    const maxId = Math.max(...testNodes.map(node => node.id));
+    setNextId(maxId + 1);
+    
+    // Make sure we're in directed mode
+    const graphTypeParts = graphType.split("-");
+    if (graphTypeParts[1] !== "directed") {
+      // Update to appropriate directed mode
+      setGraphType(`${graphTypeParts[0]}-directed`);
+    }
+  };
+  
+  // Add handler for the new test graphs
+  const handleLoadTopoSortTestGraph = () => {
+    const { nodes: testNodes, edges: testEdges } = getTopoSortTestGraph();
+    setNodes(testNodes);
+    setEdges(testEdges);
+    // Set nextId to be one more than the highest node id
+    const maxId = Math.max(...testNodes.map(node => node.id));
+    setNextId(maxId + 1);
+    
+    // Make sure we're in directed mode
+    const graphTypeParts = graphType.split("-");
+    if (graphTypeParts[1] !== "directed") {
+      // Update to appropriate directed mode
+      setGraphType(`${graphTypeParts[0]}-directed`);
+    }
+  };
+
+  const handleLoadTopoSortCyclicTestGraph = () => {
+    const { nodes: testNodes, edges: testEdges } = getTopoSortCyclicTestGraph();
     setNodes(testNodes);
     setEdges(testEdges);
     // Set nextId to be one more than the highest node id
@@ -184,6 +227,26 @@ const GraphCanvas = () => {
     }, 100);
   };
 
+  // Add function to run topological sort
+  const runTopoSortFunction = (topoSort) => {
+    setTimeout(() => {
+      const result = topoSort.topoSortWithVisualization();
+      
+      setSteps(result.steps);
+      setCurrentStepIdx(0);
+      setShowChildren(true);
+      setIsPaused(false);
+      setHasCycle(result.hasCycle);
+      setCycles(result.cycles);
+      setTopoOrder(result.order);
+      setResult({
+        order: result.order,
+        hasCycle: result.hasCycle,
+        cycles: result.cycles
+      });
+    }, 100);
+  };
+
   // Update the runGraphFunction to use the combined method
   const runGraphFunction = () => {
     // Reset previous results
@@ -193,9 +256,23 @@ const GraphCanvas = () => {
     setPath([]);
     setResult(null);
     setIsRunning(true);
+    setHasCycle(false);
+    setCycles([]);
+    setTopoOrder([]);
     
     // Select the appropriate algorithm
-    if (selectedAlgorithm === "bfs") {
+    if (selectedFunction === "topoSort") {
+      // For topological sort, validate that the graph is directed
+      if (!isDirected) {
+        alert("Topological sort requires a directed graph. Please switch to directed mode.");
+        setIsRunning(false);
+        return;
+      }
+      
+      const topoSort = new TopoSort(nodes, edges);
+      runTopoSortFunction(topoSort);
+    }
+    else if (selectedAlgorithm === "bfs") {
       const bfs = new BFS(nodes, edges, isDirected);
       
       // Execute the appropriate function based on selection
@@ -435,6 +512,12 @@ const GraphCanvas = () => {
             <button onClick={handleLoadDirectedTestGraph} className="dev-btn load-directed-btn">
               Load Directed Graph
             </button>
+            <button onClick={handleLoadTopoSortTestGraph} className="dev-btn load-topo-btn">
+              Load DAG
+            </button>
+            <button onClick={handleLoadTopoSortCyclicTestGraph} className="dev-btn load-topo-cyclic-btn">
+              Load Cyclic Graph
+            </button>
             <button onClick={handleClearGraph} className="dev-btn clear-btn">
               Delete Graph
             </button>
@@ -542,6 +625,9 @@ const GraphCanvas = () => {
               let isEnd = node.id === endNodeId;
               let isPathNode = path.includes(node.id);
               let componentIndex = -1;
+              let isCycleNode = false;
+              let isZeroIndegree = false;
+              let isProcessed = false;
 
               if (steps.length > 0 && currentStepIdx < steps.length) {
                 const step = steps[currentStepIdx];
@@ -572,6 +658,22 @@ const GraphCanvas = () => {
                     isChild = step?.visitedInComponent?.has(node.id);
                   }
                 }
+                else if (selectedFunction === "topoSort") {
+                  // Current node being processed in Khan's algorithm
+                  isCurrent = step?.current === node.id;
+                  
+                  // Nodes in the queue are nodes with zero in-degree
+                  isZeroIndegree = step?.queue?.includes(node.id);
+                  
+                  // Nodes already added to the topological order
+                  isProcessed = step?.order?.includes(node.id);
+                  
+                  // Nodes part of a cycle
+                  isCycleNode = step?.cycleNodes?.has(node.id);
+                  
+                  // Nodes whose in-degree is being updated are considered children
+                  isChild = showChildren && step?.neighbors?.includes(node.id);
+                }
               }
 
               // Determine node type
@@ -587,6 +689,13 @@ const GraphCanvas = () => {
               else if (selectedFunction === "countComponents") {
                 if (isCurrent) nodeType = "current-node";
                 else if (componentIndex >= 0) nodeType = `component-${componentIndex % 5}`; // Cycle through 5 colors
+              }
+              else if (selectedFunction === "topoSort") {
+                if (isCurrent) nodeType = "current-node";
+                else if (isCycleNode) nodeType = "cycle-node";
+                else if (isZeroIndegree) nodeType = "zero-indegree-node";
+                else if (isProcessed) nodeType = "processed-node";
+                else if (isChild) nodeType = "child-node";
               }
 
               return (
@@ -881,6 +990,46 @@ const AlgorithmTrace = ({ currentStep, startNode, endNode, path, isCompleted, fu
       </div>
     );
   }
+  else if (functionType === "topoSort") {
+    const { current, order, hasCycle, cycles, cycleNodes, type, isPartial, inDegree } = currentStep;
+    
+    return (
+      <div className="algorithm-trace">
+        <h3>Topological Sort Analysis</h3>
+        
+        {hasCycle && (
+          <div className="trace-warning">
+            <strong>Warning:</strong> Graph contains cycles! Topological sorting requires a DAG.
+            {cycles && cycles.length > 0 && (
+              <div className="cycle-info">
+                <strong>Cycles detected:</strong> {cycles.map(cycle => cycle.join(" → ")).join(", ")}
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className="trace-step">
+          <strong>Current Action:</strong> {
+            type === 'init' ? 'Initializing topological sort' :
+            type === 'process' ? `Processing node ${current} (in-degree = 0)` :
+            type === 'update-degrees' ? `Updating in-degrees after processing ${current}` :
+            type === 'complete' ? 'Topological sort complete' : 'Processing'
+          }
+        </div>
+        
+        <div className="trace-step">
+          <strong>Current Node:</strong> {current || 'None'}
+        </div>
+        
+        {order && order.length > 0 && (
+          <div className="topo-order">
+            <strong>Current Order:</strong> {order.join(" → ")}
+            {isPartial && <div className="partial-warning">(Partial order due to cycles)</div>}
+          </div>
+        )}
+      </div>
+    );
+  }
   
   return null;
 };
@@ -1007,6 +1156,87 @@ const QueueDisplay = ({ queue, newAdditions, functionType, currentStep, result, 
               {result?.nodes[component - 1]?.join(", ")}
             </div>
           )}
+        </div>
+      </div>
+    );
+  }
+  else if (functionType === "topoSort") {
+    const { queue, current, order, cycleNodes, inDegree, neighbors, newQueueAdditions } = currentStep || {};
+    
+    return (
+      <div className="queue-display">
+        <h3>Topological Sort Visualization</h3>
+        
+        {/* Zero in-degree queue display */}
+        <div className="queue-display">
+          <h4>Nodes with Zero In-degree</h4>
+          <div className="queue-container">
+            {(!queue || queue.length === 0) ? (
+              <div className="queue-empty">Queue Empty</div>
+            ) : (
+              <div className="queue-items">
+                {queue.map((nodeId, index) => {
+                  const isNewlyAdded = newQueueAdditions?.includes(nodeId);
+                  
+                  return (
+                    <div
+                      key={`queue-${nodeId}-${index}`}
+                      className={`queue-item ${index === 0 ? 'front-of-queue' : ''} 
+                                   ${isNewlyAdded ? 'newly-added' : ''}`}
+                    >
+                      {nodeId}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* In-degree display */}
+        <div className="indegree-display">
+          <h4>In-degree Values</h4>
+          <div className="indegree-container">
+            {!inDegree || inDegree.size === 0 ? (
+              <div className="indegree-empty">No in-degree information</div>
+            ) : (
+              <div className="indegree-items">
+                {Array.from(inDegree.entries()).map(([nodeId, degree]) => (
+                  <div 
+                    key={`indegree-${nodeId}`}
+                    className={`indegree-item ${degree === 0 ? 'zero-degree' : ''} 
+                               ${neighbors?.includes(Number(nodeId)) ? 'updated-degree' : ''}
+                               ${cycleNodes?.has(Number(nodeId)) ? 'cycle-node' : ''}`}
+                  >
+                    <span className="node-id">{nodeId}</span>
+                    <span className="degree-value">{degree}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Topological Order Display */}
+        <div className="topo-order-display">
+          <h4>Topological Order</h4>
+          <div className="topo-container">
+            {!order || order.length === 0 ? (
+              <div className="topo-empty">No nodes ordered yet</div>
+            ) : (
+              <div className="topo-items">
+                {order.map((nodeId, index) => (
+                  <div
+                    key={`topo-${nodeId}-${index}`}
+                    className={`topo-item ${nodeId === current ? 'just-added' : ''} 
+                                 ${cycleNodes?.has(nodeId) ? 'cycle-node' : ''}`}
+                  >
+                    {nodeId}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

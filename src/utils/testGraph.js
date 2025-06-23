@@ -92,5 +92,62 @@ export const getDirectedTestGraph = () => {
   };
 };
 
+/**
+ * Returns a directed acyclic graph (DAG) for testing topological sort
+ */
+export const getTopoSortTestGraph = () => {
+  return {
+    nodes: [
+      { id: 1, x: 100, y: 150 },
+      { id: 2, x: 250, y: 100 },
+      { id: 3, x: 250, y: 200 },
+      { id: 4, x: 400, y: 100 },
+      { id: 5, x: 400, y: 200 },
+      { id: 6, x: 550, y: 150 },
+    ],
+    edges: [
+      { a: 1, b: 2, weight: 1 },
+      { a: 1, b: 3, weight: 1 },
+      { a: 2, b: 4, weight: 1 },
+      { a: 3, b: 4, weight: 1 },
+      { a: 3, b: 5, weight: 1 },
+      { a: 4, b: 6, weight: 1 },
+      { a: 5, b: 6, weight: 1 },
+    ]
+  };
+};
+
+/**
+ * Returns a directed graph with cycles for testing topological sort
+ */
+export const getTopoSortCyclicTestGraph = () => {
+  return {
+    nodes: [
+      { id: 1, x: 100, y: 150 },
+      { id: 2, x: 250, y: 100 },
+      { id: 3, x: 250, y: 200 },
+      { id: 4, x: 400, y: 100 },
+      { id: 5, x: 400, y: 200 },
+      { id: 6, x: 550, y: 150 },
+    ],
+    edges: [
+      { a: 1, b: 2, weight: 1 },
+      { a: 1, b: 3, weight: 1 },
+      { a: 2, b: 4, weight: 1 },
+      { a: 3, b: 4, weight: 1 },
+      { a: 4, b: 2, weight: 1 }, // Creates a cycle 2->4->2
+      { a: 3, b: 5, weight: 1 },
+      { a: 4, b: 6, weight: 1 },
+      { a: 5, b: 6, weight: 1 },
+    ]
+  };
+};
+
 // Add default export for compatibility
-export default { getTestGraph, getTestGraphComponents, getDirectedTestGraph };
+export default { 
+  getTestGraph, 
+  getTestGraphComponents, 
+  getDirectedTestGraph,
+  getTopoSortTestGraph,
+  getTopoSortCyclicTestGraph 
+};

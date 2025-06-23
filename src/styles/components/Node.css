@@ -64,6 +64,33 @@
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
+/* Topo sort visualization styles */
+.graph-node.zero-indegree-node {
+  background: #34d399; /* Green color for zero indegree */
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+  animation: pulse-zero-indegree 1s infinite alternate;
+}
+
+.graph-node.processed-node {
+  background: #60a5fa; /* Blue color for processed nodes */
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+}
+
+.graph-node.cycle-node {
+  background: #ef4444; /* Red color for cycle nodes */
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+  border: 3px solid #991b1b;
+}
+
+@keyframes pulse-zero-indegree {
+  from {
+    box-shadow: 0 0 5px rgba(52, 211, 153, 0.5);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(52, 211, 153, 0.9);
+  }
+}
+
 /* Styles for trace path */
 .trace-path {
   padding: 8px;
