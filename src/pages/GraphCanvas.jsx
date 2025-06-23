@@ -15,13 +15,35 @@ const GraphCanvas = () => {
   const isWeighted = weightType === "weighted";
   const isDirected = directionType === "directed";
 
-  // Update available function types with topo sort
-  const graphFunctions = [
-    { id: "shortestPath", label: "Find Shortest Path" },
-    { id: "countComponents", label: "Count Connected Components" },
-    { id: "topoSort", label: "Topological Sort" }  // Add topological sort option
-  ];
+  // Update available function types - will filter based on graph type
+  const getAvailableFunctions = (isDirected) => {
+    const functions = [
+      { id: "shortestPath", label: "Find Shortest Path" },
+      { id: "countComponents", label: "Count Connected Components" }
+    ];
+    
+    // Only add topological sort for directed graphs
+    if (isDirected) {
+      functions.push({ id: "topoSort", label: "Topological Sort" });
+    }
+    
+    return functions;
+  };
+
+  // Use dynamic functions based on graph type
+  const graphFunctions = getAvailableFunctions(isDirected);
   
+  // Update function when graph type changes
+  useEffect(() => {
+    const availableFunctions = getAvailableFunctions(isDirected);
+    
+    // If current function is topoSort but graph is now undirected, reset to a valid function
+    if (selectedFunction === "topoSort" && !isDirected) {
+      setSelectedFunction("shortestPath");
+      setSelectedAlgorithm("bfs");
+    }
+  }, [isDirected]);
+
   // Update available algorithm types
   const graphAlgorithms = {
     "shortestPath": [
