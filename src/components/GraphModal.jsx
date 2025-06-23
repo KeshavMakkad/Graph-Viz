@@ -23,9 +23,9 @@ const GraphModal = ({ onClose, onStart }) => {
         />
         <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="unweighted-undirected">Unweighted Undirected</option>
-          <option value="weighted-undirected">Weighted Undirected</option>
+          {/* <option value="weighted-undirected">Weighted Undirected</option> */}
           <option value="unweighted-directed">Unweighted Directed</option>
-          <option value="weighted-directed">Weighted Directed</option>
+          {/* <option value="weighted-directed">Weighted Directed</option> */}
         </select>
         <div className="modal-actions">
           <button onClick={handleSubmit}>Start</button>
