@@ -539,6 +539,26 @@ const GraphCanvas = () => {
 
   return (
     <div className={`graph-page-container ${deleteMode ? 'delete-mode' : ''}`}>
+      {/* Add Graph Info Header */}
+      <div className="graph-info-header">
+        <div className="graph-title-section">
+          <h1 className="graph-title">{name}</h1>
+          <span className="graph-type-badge">
+            {isWeighted ? "Weighted" : "Unweighted"} {isDirected ? "Directed" : "Undirected"} Graph
+          </span>
+        </div>
+        <div className="graph-stats">
+          <div className="stat-item">
+            <span className="stat-value">{nodes.length}</span>
+            <span className="stat-label">Nodes</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">{edges.length}</span>
+            <span className="stat-label">Edges</span>
+          </div>
+        </div>
+      </div>
+      
       {isDev && (
         <div className="dev-controls">
           <div className="dev-header">Test Controls</div>
@@ -956,32 +976,47 @@ const AlgorithmTrace = ({ currentStep, startNode, endNode, path, isCompleted, fu
 
     return (
       <div className="algorithm-trace">
-        <h3>Shortest Path Algorithm Steps</h3>
+        <div className="trace-header">
+          <h3>Shortest Path Analysis</h3>
+          {isCompleted && path.length > 0 && (
+            <div className="success-badge">Path Found</div>
+          )}
+        </div>
+        
         {isCompleted && path.length > 0 && (
           <div className="trace-path">
-            <strong>Shortest Path Found:</strong>{" "}
-            {path.join(" → ")}
+            <div className="path-display">
+              <span className="path-label">Path:</span>
+              <span className="path-nodes">{path.join(" → ")}</span>
+            </div>
             <div className="trace-path-length">
-              <strong>Path Length:</strong> {path.length - 1} edge(s)
+              <span className="length-label">Length:</span>
+              <span className="length-value">{path.length - 1} edge(s)</span>
             </div>
           </div>
         )}
-        <div className="trace-step">
-          <strong>Start Node:</strong> {startNode}
-        </div>
-        <div className="trace-step">
-          <strong>End Node:</strong> {endNode}
-        </div>
-        <div className="trace-step">
-          <strong>Current Node:</strong> {current} {isEnd ? "(Destination Reached!)" : ""}
-        </div>
-        <div className="trace-step">
-          <strong>Finding Neighbors:</strong>{" "}
-          {children?.length > 0 ? children.join(", ") : "None"}
-        </div>
-        <div className="trace-step">
-          <strong>Queue Status:</strong>{" "}
-          {queue?.length > 0 ? queue.join(" → ") : "Empty"}
+        
+        <div className="trace-details">
+          <div className="trace-detail-row">
+            <div className="detail-label">Start:</div>
+            <div className="detail-value highlight-start">{startNode}</div>
+            <div className="detail-label">End:</div>
+            <div className="detail-value highlight-end">{endNode}</div>
+          </div>
+          
+          <div className="trace-detail-row">
+            <div className="detail-label">Current Node:</div>
+            <div className="detail-value highlight-current">
+              {current} {isEnd ? <span className="destination-reached">(Destination Reached!)</span> : ""}
+            </div>
+          </div>
+          
+          <div className="trace-detail-row">
+            <div className="detail-label">Neighbors:</div>
+            <div className="detail-value">
+              {children?.length > 0 ? children.join(", ") : "None"}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -991,80 +1026,128 @@ const AlgorithmTrace = ({ currentStep, startNode, endNode, path, isCompleted, fu
     
     return (
       <div className="algorithm-trace">
-        <h3>Connected Components Analysis</h3>
+        <div className="trace-header">
+          <h3>Connected Components Analysis</h3>
+          {result && (
+            <div className="success-badge">{result.count} Components</div>
+          )}
+        </div>
+        
         {result && (
           <div className="trace-result">
-            <div className="component-count">
-              <strong>Total Components:</strong> {result.count}
-            </div>
-            <div className="component-sizes">
-              <strong>Component Sizes:</strong>{" "}
-              {result.sizes.map((size, i) => `Component ${i+1}: ${size} node(s)`).join(", ")}
+            <div className="result-grid">
+              {result.nodes.map((componentNodes, idx) => (
+                <div key={idx} className={`component-item component-${idx % 5}`}>
+                  <div className={`component-badge component-${idx % 5}`}>
+                    Component {idx + 1}
+                  </div>
+                  <div className="component-info">
+                    <span className="component-count">{componentNodes.length}</span> node(s)
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
         
-        <div className="trace-step">
-          <strong>Algorithm:</strong> {algorithm === "dfs" ? "Depth-First Search" : "Breadth-First Search"}
+        <div className="trace-details">
+          <div className="trace-detail-row">
+            <div className="detail-label">Algorithm:</div>
+            <div className="detail-value">
+              {algorithm === "dfs" ? "Depth-First Search" : "Breadth-First Search"}
+            </div>
+          </div>
+          
+          <div className="trace-detail-row">
+            <div className="detail-label">Action:</div>
+            <div className="detail-value">
+              {type === 'start-component' ? 'Starting new component' :
+               type === 'visit' ? `Visiting node ${current}` :
+               type === 'stack-update' ? 'Adding neighbors to stack' :
+               type === 'backtrack' ? 'Backtracking' :
+               type === 'complete-component' ? 'Component complete' : 'Initializing'}
+            </div>
+          </div>
+          
+          <div className="trace-detail-row">
+            <div className="detail-label">Current Node:</div>
+            <div className="detail-value highlight-current">{current || 'None'}</div>
+          </div>
+          
+          <div className="trace-detail-row">
+            <div className="detail-label">Current Component:</div>
+            <div className="detail-value highlight-component-index">{component || 'None'}</div>
+          </div>
         </div>
-        
-        <div className="trace-step">
-          <strong>Current Action:</strong> {
-            type === 'start-component' ? 'Starting new component' :
-            type === 'visit' ? `Visiting node ${current}` :
-            type === 'stack-update' ? 'Adding neighbors to stack' :
-            type === 'backtrack' ? 'Backtracking' :
-            type === 'complete-component' ? 'Component complete' : 'Initializing'
-          }
-        </div>
-        
-        <div className="trace-step">
-          <strong>Current Node:</strong> {current || 'None'}
-        </div>
-        
-        <div className="trace-step">
-          <strong>Component:</strong> {component || 'None'} 
-          {result && result.count ? ` of ${result.count}` : ''}
-        </div>
-        
       </div>
     );
   }
   else if (functionType === "topoSort") {
-    const { current, order, hasCycle, cycles, cycleNodes, type, isPartial, inDegree } = currentStep;
+    const { current, order, hasCycle, cycles, cycleNodes, type, isPartial } = currentStep;
     
     return (
       <div className="algorithm-trace">
-        <h3>Topological Sort Analysis</h3>
+        <div className="trace-header">
+          <h3>Topological Sort Analysis</h3>
+          {hasCycle ? (
+            <div className="warning-badge">Cycles Detected</div>
+          ) : (
+            <div className="success-badge">Valid DAG</div>
+          )}
+        </div>
         
         {hasCycle && (
           <div className="trace-warning">
-            <strong>Warning:</strong> Graph contains cycles! Topological sorting requires a DAG.
+            <div className="warning-title">
+              <span className="warning-icon">⚠️</span>
+              Graph contains cycles!
+            </div>
+            <div className="warning-info">
+              Topological sorting requires a Directed Acyclic Graph (DAG).
+            </div>
             {cycles && cycles.length > 0 && (
               <div className="cycle-info">
-                <strong>Cycles detected:</strong> {cycles.map(cycle => cycle.join(" → ")).join(", ")}
+                <div className="cycle-info-title">Cycles detected:</div>
+                <div className="cycle-list">
+                  {cycles.map((cycle, idx) => (
+                    <div key={idx} className="cycle-item">
+                      {cycle.join(" → ")}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
         
-        <div className="trace-step">
-          <strong>Current Action:</strong> {
-            type === 'init' ? 'Initializing topological sort' :
-            type === 'process' ? `Processing node ${current} (in-degree = 0)` :
-            type === 'update-degrees' ? `Updating in-degrees after processing ${current}` :
-            type === 'complete' ? 'Topological sort complete' : 'Processing'
-          }
-        </div>
-        
-        <div className="trace-step">
-          <strong>Current Node:</strong> {current || 'None'}
+        <div className="trace-details">
+          <div className="trace-detail-row">
+            <div className="detail-label">Current Action:</div>
+            <div className="detail-value">
+              {type === 'init' ? 'Initializing topological sort' :
+               type === 'process' ? `Processing node ${current} (in-degree = 0)` :
+               type === 'update-degrees' ? `Updating in-degrees after processing ${current}` :
+               type === 'complete' ? 'Topological sort complete' : 'Processing'}
+            </div>
+          </div>
+          
+          <div className="trace-detail-row">
+            <div className="detail-label">Current Node:</div>
+            <div className="detail-value highlight-current">{current || 'None'}</div>
+          </div>
         </div>
         
         {order && order.length > 0 && (
-          <div className="topo-order">
-            <strong>Current Order:</strong> {order.join(" → ")}
-            {isPartial && <div className="partial-warning">(Partial order due to cycles)</div>}
+          <div className="topo-order-result">
+            <div className="order-title">Topological Order:</div>
+            <div className="order-nodes">
+              {order.join(" → ")}
+            </div>
+            {isPartial && (
+              <div className="partial-warning">
+                (Partial order due to cycles)
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1077,142 +1160,136 @@ const AlgorithmTrace = ({ currentStep, startNode, endNode, path, isCompleted, fu
 const QueueDisplay = ({ queue, newAdditions, functionType, currentStep, result, algorithm }) => {
   if (functionType === "shortestPath") {
     return (
-      <div className="queue-display">
-        <h3>BFS Queue</h3>
+      <div className="data-structure-display">
+        <div className="display-header">
+          <h3>BFS Queue</h3>
+          <div className="display-badge">{queue ? queue.length : 0} items</div>
+        </div>
         <div className="queue-container">
           {!queue || queue.length === 0 ? (
             <div className="queue-empty">Queue Empty</div>
           ) : (
-            queue.map((nodeId, index) => (
-              <div
-                key={index}
-                className={`queue-item ${
-                  newAdditions?.includes(nodeId) ? "newly-added" : ""
-                }`}
-              >
-                {nodeId}
-              </div>
-            ))
+            <div className="queue-items">
+              {queue.map((nodeId, index) => (
+                <div
+                  key={`queue-${nodeId}-${index}`}
+                  className={`queue-item ${
+                    newAdditions?.includes(nodeId) ? "newly-added" : ""
+                  } ${index === 0 ? "front-of-queue" : ""}`}
+                >
+                  {nodeId}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
     );
   } 
   else if (functionType === "countComponents") {
-    const { component, visitedInComponent, stack, current, children } = currentStep || {};
+    const { component, visitedInComponent, stack, current, children, queue: currentQueue } = currentStep || {};
     
     return (
-      <div className="queue-display">
-        <h3>Component Visualization</h3>
-        <div className="component-indicator">
-          {result && component && (
-            <div className="current-component">
-              <strong>Current Component:</strong> {component} of {result.count}
-            </div>
-          )}
-        </div>
-        
-        {/* Stack display for DFS with animations */}
-        {algorithm === "dfs" && (
-          <div className="stack-display">
-            <h4>DFS Stack</h4>
-            <div className="stack-container">
-              {(!stack || stack.length === 0) ? (
-                <div className="stack-empty">Stack Empty</div>
-              ) : (
-                <div className="stack-items">
-                  {stack.map((nodeId, index) => (
-                    <div
-                      key={`stack-${nodeId}-${index}`}
-                      className={`stack-item ${index === stack.length - 1 ? 'top-of-stack' : ''}`}
-                      style={{
-                        animationDelay: `${index * 0.1}s`
-                      }}
-                    >
-                      {nodeId}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+      <div className="data-structure-display">
+      {/* Stack display for DFS with animations */}
+      {algorithm === "dfs" ? (
+        <div className="stack-display">
+          <div className="display-header">
+            <h3>DFS Stack</h3>
+            <div className="display-badge">{stack ? stack.length : 0} items</div>
           </div>
-        )}
-        
-        {/* Queue display for BFS with animations */}
-        {algorithm === "bfs" && (
-          <div className="queue-display">
-            <h4>BFS Queue</h4>
-            <div className="queue-container">
-              {(!currentStep.queue || currentStep.queue.length === 0) ? (
-                <div className="queue-empty">Queue Empty</div>
-              ) : (
-                <div className="queue-items">
-                  {currentStep.queue.map((nodeId, index) => {
-                    // Determine appropriate class names
-                    const isFirst = index === 0;
-                    const isNewlyAdded = currentStep.newAdditions?.includes(nodeId);
-                    
-                    return (
-                      <div
-                        key={`queue-${nodeId}-${index}-${currentStep.component}`}
-                        className={`queue-item ${isFirst ? 'front-of-queue' : ''} ${isNewlyAdded ? 'newly-added' : ''}`}
-                      >
-                        {nodeId}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {/* Always show the children display container, with placeholder when empty */}
-        <div className="children-display">
-          <h4>Unvisited Neighbors Added</h4>
-          <div className="children-container">
-            {!children || children.length === 0 ? (
-              <div className="children-empty">No neighbors being added in this step</div>
+          <div className="stack-container">
+            {(!stack || stack.length === 0) ? (
+              <div className="stack-empty">Stack Empty</div>
             ) : (
-              children.map((nodeId, index) => (
-                <div
-                  key={`child-${nodeId}-${index}`}
-                  className="child-item animate-fade-in"
-                  style={{
-                    animationDelay: `${index * 0.15}s`
-                  }}
-                >
-                  {nodeId}
-                </div>
-              ))
+              <div className="stack-items">
+                {stack.map((nodeId, index) => (
+                  <div
+                    key={`stack-${nodeId}-${index}`}
+                    className={`stack-item ${index === stack.length - 1 ? 'top-of-stack' : ''}`}
+                  >
+                    {nodeId}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
-        
-        <div className="component-nodes">
-          {result?.nodes && component && (
-            <div className="nodes-in-component">
-              <strong>Nodes in Component {component}:</strong>{" "}
-              {result?.nodes[component - 1]?.join(", ")}
+      ) : (
+        <div className="queue-display">
+          <div className="display-header">
+            <h3>BFS Queue</h3>
+            <div className="display-badge">{currentQueue ? currentQueue.length : 0} items</div>
+          </div>
+          <div className="queue-container">
+            {(!currentQueue || currentQueue.length === 0) ? (
+              <div className="queue-empty">Queue Empty</div>
+            ) : (
+              <div className="queue-items">
+                {currentQueue.map((nodeId, index) => {
+                  const isFirst = index === 0;
+                  const isNewlyAdded = currentStep.newAdditions?.includes(nodeId);
+                  
+                  return (
+                    <div
+                      key={`queue-${nodeId}-${index}-${component}`}
+                      className={`queue-item ${isFirst ? 'front-of-queue' : ''} ${isNewlyAdded ? 'newly-added' : ''}`}
+                    >
+                      {nodeId}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Horizontal layout for unvisited neighbors */}
+      <div className="children-display horizontal">
+        <div className="display-header">
+          <h3>Unvisited Neighbors</h3>
+          <div className="display-badge">{children ? children.length : 0}</div>
+        </div>
+        <div className="children-container horizontal">
+          {!children || children.length === 0 ? (
+            <div className="children-empty">No neighbors being added</div>
+          ) : (
+            <div className="children-flex">
+              {children.map((nodeId, index) => {
+                const componentForNode = result && result.nodes ? 
+                  result.nodes.findIndex(componentNodes => componentNodes.includes(nodeId)) : -1;
+                
+                return (
+                  <div
+                    key={`child-${nodeId}-${index}`}
+                    className={`child-item animate-fade-in ${componentForNode >= 0 ? `component-${componentForNode % 5}` : ''}`}
+                  >
+                    {nodeId}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
+    </div>
     );
   }
   else if (functionType === "topoSort") {
     const { queue, current, order, cycleNodes, inDegree, neighbors, newQueueAdditions } = currentStep || {};
     
     return (
-      <div className="queue-display">
-        <h3>Topological Sort Visualization</h3>
-        
+      <div className="data-structure-display">
         {/* Zero in-degree queue display */}
         <div className="queue-display">
-          <h4>Nodes with Zero In-degree</h4>
+          <div className="display-header">
+            <h3>Zero In-degree Queue</h3>
+            <div className="display-badge">{queue ? queue.length : 0} nodes</div>
+          </div>
           <div className="queue-container">
             {(!queue || queue.length === 0) ? (
-              <div className="queue-empty">Queue Empty</div>
+              <div className="queue-empty">No nodes with zero in-degree</div>
             ) : (
               <div className="queue-items">
                 {queue.map((nodeId, index) => {
@@ -1235,7 +1312,9 @@ const QueueDisplay = ({ queue, newAdditions, functionType, currentStep, result, 
         
         {/* In-degree display */}
         <div className="indegree-display">
-          <h4>In-degree Values</h4>
+          <div className="display-header">
+            <h3>In-degree Values</h3>
+          </div>
           <div className="indegree-container">
             {!inDegree || inDegree.size === 0 ? (
               <div className="indegree-empty">No in-degree information</div>
@@ -1259,7 +1338,10 @@ const QueueDisplay = ({ queue, newAdditions, functionType, currentStep, result, 
         
         {/* Topological Order Display */}
         <div className="topo-order-display">
-          <h4>Topological Order</h4>
+          <div className="display-header">
+            <h3>Topological Order</h3>
+            <div className="display-badge">{order ? order.length : 0}/{inDegree ? inDegree.size : 0}</div>
+          </div>
           <div className="topo-container">
             {!order || order.length === 0 ? (
               <div className="topo-empty">No nodes ordered yet</div>
@@ -1269,7 +1351,7 @@ const QueueDisplay = ({ queue, newAdditions, functionType, currentStep, result, 
                   <div
                     key={`topo-${nodeId}-${index}`}
                     className={`topo-item ${nodeId === current ? 'just-added' : ''} 
-                                 ${cycleNodes?.has(nodeId) ? 'cycle-node' : ''}`}
+                               ${cycleNodes?.has(nodeId) ? 'cycle-node' : ''}`}
                   >
                     {nodeId}
                   </div>
