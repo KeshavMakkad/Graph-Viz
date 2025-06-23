@@ -64,7 +64,7 @@
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
-/* Topo sort visualization styles */
+/* Improved Topo sort visualization styles with higher specificity */
 .graph-node.zero-indegree-node {
   background: #34d399; /* Green color for zero indegree */
   box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
@@ -77,9 +77,25 @@
 }
 
 .graph-node.cycle-node {
-  background: #ef4444; /* Red color for cycle nodes */
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
-  border: 3px solid #991b1b;
+  position: absolute !important; /* Ensure position is absolute */
+  background: #ef4444 !important; /* Red color for cycle nodes */
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7) !important;
+  border: 3px solid #991b1b !important;
+  width: 54px !important; /* Slightly larger to show the border */
+  height: 54px !important;
+  z-index: 10; /* Ensure cycle nodes appear on top */
+  transform: translate(-50%, -50%) !important; /* Ensure position is fixed */
+  animation: pulse-cycle-color 1s infinite alternate !important;
+}
+
+/* Separate animations for color pulsing and size to avoid transform issues */
+@keyframes pulse-cycle-color {
+  from {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.9);
+  }
 }
 
 @keyframes pulse-zero-indegree {
@@ -88,6 +104,17 @@
   }
   to {
     box-shadow: 0 0 15px rgba(52, 211, 153, 0.9);
+  }
+}
+
+@keyframes pulse-cycle {
+  from {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.9);
+    transform: translate(-50%, -50%) scale(1.05);
   }
 }
 
