@@ -9,7 +9,7 @@ Try the application now: [Graph Algorithm Visualizer](https://graph-viz-xi.verce
 ## Demo
 
 Watch a demonstration of the application:
-[View Demo Video]([https://drive.google.com/file/d/1QK-UlC7jJH7P7YmDQ2q5WVW6OeBDo8Ug/view?usp=sharing](https://drive.google.com/file/d/1tG7PAZyqzHlU09ay6YeEHatVS7EPUM-8/view?usp=sharing))
+[View Demo Video](https://drive.google.com/file/d/1QK-UlC7jJH7P7YmDQ2q5WVW6OeBDo8Ug/view?usp=sharing](https://drive.google.com/file/d/1tG7PAZyqzHlU09ay6YeEHatVS7EPUM-8/view?usp=sharing)
 
 ## Features
 
