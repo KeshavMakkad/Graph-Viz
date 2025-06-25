@@ -548,7 +548,7 @@ const GraphCanvas = () => {
           </span>
         </div>
         <div className="graph-actions">
-          <Link to="/docs" className="docs-link">View Algorithm Docs</Link>
+          <Link to="/docs" className="docs-link">Algorithm Docs</Link>
           <div className="graph-stats">
             <div className="stat-item">
               <span className="stat-value">{nodes.length}</span>

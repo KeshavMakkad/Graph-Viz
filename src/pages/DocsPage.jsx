@@ -8,7 +8,11 @@ const DocsPage = () => {
       <header className="docs-header">
         <div className="header-content">
           <h1>Graph Algorithm Documentation</h1>
-          <Link to="/" className="back-to-app-btn">Back to App</Link>
+          <div className="nav-links">
+            <Link to="/" className="header-link">Home</Link>
+            <Link to="/graph" className="header-link">Graph Canvas</Link>
+            <Link to="/" className="back-to-app-btn">Back to App</Link>
+          </div>
         </div>
       </header>
       
