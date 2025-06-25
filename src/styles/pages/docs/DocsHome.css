@@ -74,8 +74,8 @@
 
 .algorithm-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
   margin-bottom: 50px;
 }
 
@@ -180,6 +180,12 @@
 .legacy-docs-link a:hover {
   color: #475569;
   border-bottom-style: solid;
+}
+
+@media (max-width: 992px) {
+  .algorithm-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {

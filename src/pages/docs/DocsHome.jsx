@@ -16,8 +16,7 @@ const DocsHome = () => {
       </header>
       
       <div className="docs-content">
-        <h2 className="docs-subtitle">Choose an algorithm to learn more</h2>
-        
+
         <div className="algorithm-cards">
           <Link to="/docs/bfs" className="algorithm-card">
             <div className="card-icon">BFS</div>
@@ -55,11 +54,10 @@ const DocsHome = () => {
             <div className="card-cta">Learn More →</div>
           </Link>
         </div>
-        
-        <div className="legacy-docs-link">
+      </div>
+      <div className="legacy-docs-link">
           <Link to="/documentation">View Legacy Documentation</Link>
         </div>
-      </div>
     </div>
   );
 };

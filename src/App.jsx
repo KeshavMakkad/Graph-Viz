@@ -13,7 +13,8 @@ import DocsPage from './pages/DocsPage';
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<GraphCanvas />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/canvas" element={<GraphCanvas />} />
       
       {/* Documentation routes */}
       <Route path="/docs" element={<DocsHome />} />
