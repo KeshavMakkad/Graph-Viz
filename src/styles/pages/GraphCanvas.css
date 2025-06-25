@@ -315,7 +315,6 @@ body, button, input, select, textarea {
   color: #64748b;
   font-weight: 500;
   font-size: 0.85rem;
-  white-space: nowrap;
 }
 
 .path-nodes {
@@ -1014,7 +1013,6 @@ body, button, input, select, textarea {
   margin-bottom: 15px;
   border-radius: 4px;
   color: #c53030;
-  font-size: 0.9rem;
 }
 
 .cycle-info {
@@ -1633,35 +1631,37 @@ body, button, input, select, textarea {
   color: white;
 }
 
-/* Fix text wrapping in headers */
-.trace-header {
+/* Update the graph-info-header section */
+.graph-info-header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 12px;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.trace-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #0f172a;
-  font-weight: 600;
-  white-space: nowrap;
+.graph-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
-.success-badge, .warning-badge {
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+.docs-link {
+  color: #3b82f6;
+  text-decoration: none;
   font-weight: 500;
-  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #3b82f6;
+  transition: all 0.2s;
 }
 
-/* Fix text wrapping in detail rows */
-.trace-detail-row {
+.docs-link:hover {
+  background-color: #3b82f6;
+  color: white;
+}
   display: flex;
   flex-direction: column;
   align-items: flex-start;

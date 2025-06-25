@@ -3,7 +3,7 @@ import Node from "./../components/Node";
 import { BFS } from "../algorithms/BFS";
 import { DFS } from "../algorithms/DFS";
 import { TopoSort } from "../algorithms/TopoSort"; // Add this import
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import "./../styles/pages/GraphCanvas.css";
 import { getTestGraph, getDirectedTestGraph, getTopoSortTestGraph, getTopoSortCyclicTestGraph } from "../utils/testGraph";
 import { getRandomGraph } from "../utils/loadGraph";
@@ -547,14 +547,17 @@ const GraphCanvas = () => {
             {isWeighted ? "Weighted" : "Unweighted"} {isDirected ? "Directed" : "Undirected"} Graph
           </span>
         </div>
-        <div className="graph-stats">
-          <div className="stat-item">
-            <span className="stat-value">{nodes.length}</span>
-            <span className="stat-label">Nodes</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-value">{edges.length}</span>
-            <span className="stat-label">Edges</span>
+        <div className="graph-actions">
+          <Link to="/docs" className="docs-link">View Algorithm Docs</Link>
+          <div className="graph-stats">
+            <div className="stat-item">
+              <span className="stat-value">{nodes.length}</span>
+              <span className="stat-label">Nodes</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">{edges.length}</span>
+              <span className="stat-label">Edges</span>
+            </div>
           </div>
         </div>
       </div>
