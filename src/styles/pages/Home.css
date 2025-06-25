@@ -29,3 +29,15 @@
 .create-graph-button:hover {
   background-color: #1e40af;
 }
+
+/* New styles for documentation link */
+.docs-link-home-page {
+  font-size: 1rem;
+  color: #4b5563;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+
+.docs-link-home-page:hover {
+  color: #1e40af;
+}

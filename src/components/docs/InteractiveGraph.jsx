@@ -1,162 +1,151 @@
-import React from "react";
+import React, { useEffect, useRef } from 'react';
 
 const InteractiveGraph = ({ nodes, edges, currentStep, directed = false }) => {
-  const nodeRadius = 20;
-
-  // Determine node state (for coloring and behavior)
-  const getNodeState = (nodeId) => {
-    const id = String(nodeId);
-
-    if (!currentStep) return "default";
-    if (String(currentStep.current) === id) return "current";
-    if (String(currentStep.processing) === id) return "processing";
-
-    if (currentStep.topoOrder?.map(String).includes(id)) return "processed";
-    if (currentStep.visited?.map(String).includes(id)) {
-      if (currentStep.newlyVisited?.map(String).includes(id)) return "newly-visited";
-      return "visited";
-    }
-
-    if (currentStep.queue?.map(String).includes(id)) return "in-queue";
-    if (currentStep.stack?.map(String).includes(id)) return "in-stack";
-
-    return "default";
-  };
-
-  // Determine edge state (for highlighting)
-  const getEdgeState = (edge) => {
-    if (!currentStep) return "default";
-
-    const edgeA = String(edge.a);
-    const edgeB = String(edge.b);
-
-    const isPathEdge = currentStep.path?.some(path => {
-      return path.some((_, idx) => {
-        const current = String(path[idx]);
-        const next = String(path[idx + 1]);
-        return (edgeA === current && edgeB === next) ||
-               (!directed && edgeA === next && edgeB === current);
-      });
+  const canvasRef = useRef(null);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Clear canvas
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    
+    // Draw edges first
+    edges.forEach(edge => {
+      const sourceNode = nodes.find(n => n.id === edge.a);
+      const targetNode = nodes.find(n => n.id === edge.b);
+      
+      if (sourceNode && targetNode) {
+        // Determine edge state
+        let edgeColor = '#cbd5e1'; // Default color
+        let edgeWidth = 2;
+        
+        // Check if this edge involves the current node
+        if (currentStep && (
+            (currentStep.current === sourceNode.id && currentStep.processing === targetNode.id) ||
+            (currentStep.current === targetNode.id && currentStep.processing === sourceNode.id)
+          )) {
+          edgeColor = '#f97316'; // Active edge
+          edgeWidth = 3;
+        }
+        
+        // Draw the edge line
+        ctx.beginPath();
+        ctx.moveTo(sourceNode.x, sourceNode.y);
+        ctx.lineTo(targetNode.x, targetNode.y);
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = edgeWidth;
+        ctx.stroke();
+        
+        // If directed, draw an arrow
+        if (directed) {
+          const angle = Math.atan2(targetNode.y - sourceNode.y, targetNode.x - sourceNode.x);
+          const arrowSize = 10;
+          
+          const arrowX = targetNode.x - 20 * Math.cos(angle);
+          const arrowY = targetNode.y - 20 * Math.sin(angle);
+          
+          ctx.beginPath();
+          ctx.moveTo(arrowX, arrowY);
+          ctx.lineTo(
+            arrowX - arrowSize * Math.cos(angle - Math.PI/6), 
+            arrowY - arrowSize * Math.sin(angle - Math.PI/6)
+          );
+          ctx.lineTo(
+            arrowX - arrowSize * Math.cos(angle + Math.PI/6), 
+            arrowY - arrowSize * Math.sin(angle + Math.PI/6)
+          );
+          ctx.closePath();
+          ctx.fillStyle = edgeColor;
+          ctx.fill();
+        }
+      }
     });
-
-    if (isPathEdge) return "path";
-    if (String(currentStep.current) === edgeA) return "active";
-    if (currentStep.updated?.map(String).includes(edgeB)) return "updated";
-
-    return "default";
-  };
-
-  // Set fixed dimensions for the SVG
-  const svgWidth = 500;
-  const svgHeight = 300;
-
+    
+    // Draw nodes on top of edges
+    nodes.forEach(node => {
+      // Determine node state
+      let nodeColor = '#94a3b8'; // Default color
+      let nodeBorder = '#475569';
+      let borderWidth = 2;
+      
+      if (currentStep) {
+        if (currentStep.current === node.id) {
+          nodeColor = '#3b82f6'; // Current node
+          nodeBorder = '#1d4ed8';
+          borderWidth = 3;
+        } else if (currentStep.processing === node.id) {
+          nodeColor = '#f97316'; // Processing node
+          nodeBorder = '#ea580c';
+          borderWidth = 3;
+        } else if (currentStep.visited && currentStep.visited.includes(node.id)) {
+          nodeColor = '#8b5cf6'; // Visited node
+          nodeBorder = '#7c3aed';
+        } else if (currentStep.queue && currentStep.queue.includes(node.id)) {
+          nodeColor = '#0ea5e9'; // Queued node
+          nodeBorder = '#0284c7';
+        } else if (currentStep.stack && currentStep.stack.includes(node.id)) {
+          nodeColor = '#ef4444'; // Stack node
+          nodeBorder = '#dc2626';
+        }
+        
+        // Newly visited node styling
+        if (currentStep.newlyVisited && currentStep.newlyVisited.includes(node.id)) {
+          borderWidth = 4;
+        }
+      }
+      
+      // Draw the node circle
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 18, 0, 2 * Math.PI);
+      ctx.fillStyle = nodeColor;
+      ctx.fill();
+      ctx.lineWidth = borderWidth;
+      ctx.strokeStyle = nodeBorder;
+      ctx.stroke();
+      
+      // Draw the node id
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(node.id.toString(), node.x, node.y);
+    });
+    
+  }, [nodes, edges, currentStep, directed]);
+  
   return (
     <div className="interactive-graph-container">
-      <svg
-        width={svgWidth}
-        height={svgHeight}
-        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-        className="interactive-graph"
-      >
-        {/* Edges */}
-        {edges.map((edge, index) => {
-          const fromNode = nodes.find(n => String(n.id) === String(edge.a));
-          const toNode = nodes.find(n => String(n.id) === String(edge.b));
-          if (!fromNode || !toNode) return null;
-
-          const edgeState = getEdgeState(edge);
-          const dx = toNode.x - fromNode.x;
-          const dy = toNode.y - fromNode.y;
-          const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-          const length = Math.sqrt(dx * dx + dy * dy);
-
-          const startX = fromNode.x + (nodeRadius * dx / length);
-          const startY = fromNode.y + (nodeRadius * dy / length);
-          const endX = toNode.x - (nodeRadius * dx / length);
-          const endY = toNode.y - (nodeRadius * dy / length);
-
-          const strokeColor =
-            edgeState === "path" ? "#22c55e" :
-            edgeState === "active" ? "#3b82f6" :
-            edgeState === "updated" ? "#f97316" :
-            "#9ca3af";
-
-          const strokeWidth = edgeState === "path" ? 3 : 2;
-
-          return (
-            <g key={`edge-${index}`} className={`graph-edge edge-state-${edgeState}`}>
-              <line
-                x1={startX}
-                y1={startY}
-                x2={endX}
-                y2={endY}
-                stroke={strokeColor}
-                strokeWidth={strokeWidth}
-              />
-              {directed && (
-                <polygon
-                  points="0,-5 10,0 0,5"
-                  transform={`translate(${endX}, ${endY}) rotate(${angle})`}
-                  fill={strokeColor}
-                />
-              )}
-            </g>
-          );
-        })}
-
-        {/* Nodes */}
-        {nodes.map(node => {
-          const nodeState = getNodeState(node.id);
-          const nodeColor =
-            nodeState === "current" ? "#3b82f6" :
-            nodeState === "processing" ? "#f97316" :
-            nodeState === "processed" ? "#14b8a6" :
-            nodeState === "visited" ? "#8b5cf6" :
-            nodeState === "newly-visited" ? "#f43f5e" :
-            nodeState === "in-queue" ? "#eab308" :
-            nodeState === "in-stack" ? "#ef4444" :
-            "#6b7280";
-
-          return (
-            <g key={`node-${node.id}`} className={`graph-node node-state-${nodeState}`}>
-              <circle
-                cx={node.x}
-                cy={node.y}
-                r={nodeRadius}
-                fill="white"
-                stroke={nodeColor}
-                strokeWidth="3"
-              />
-              <text
-                x={node.x}
-                y={node.y}
-                textAnchor="middle"
-                alignmentBaseline="middle"
-                dy="0.35em"
-                fontSize="14"
-                fontWeight="bold"
-                fill={nodeColor}
-              >
-                {node.id}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-
-      {/* Legend */}
+      <canvas 
+        ref={canvasRef} 
+        className="interactive-graph" 
+        width={550} 
+        height={300}
+      />
       <div className="graph-legend">
-        {[
-          { color: "#6b7280", label: "Default" },
-          { color: "#3b82f6", label: "Current" },
-          { color: "#8b5cf6", label: "Visited" },
-          { color: "#14b8a6", label: "Processed" }
-        ].map((item, i) => (
-          <div key={i} className="legend-item">
-            <div className="legend-color" style={{ backgroundColor: item.color }}></div>
-            <span>{item.label}</span>
+        <div className="legend-item">
+          <div className="legend-color" style={{backgroundColor: '#3b82f6'}}></div>
+          <span>Current Node</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{backgroundColor: '#8b5cf6'}}></div>
+          <span>Visited Node</span>
+        </div>
+        {currentStep && currentStep.queue && (
+          <div className="legend-item">
+            <div className="legend-color" style={{backgroundColor: '#0ea5e9'}}></div>
+            <span>In Queue</span>
           </div>
-        ))}
+        )}
+        {currentStep && currentStep.stack && (
+          <div className="legend-item">
+            <div className="legend-color" style={{backgroundColor: '#ef4444'}}></div>
+            <span>In Stack</span>
+          </div>
+        )}
       </div>
     </div>
   );
