@@ -6,21 +6,21 @@ import DocsHeader from "../../components/docs/DocsHeader";
 import InteractiveGraph from "../../components/docs/InteractiveGraph";
 
 const KhanPage = () => {
-  // Sample directed acyclic graph for Khan's algorithm
+  // Sample directed acyclic graph for Khan's algorithm with fixed positions
   const [graph, setGraph] = useState({
     nodes: [
-      { id: 1, x: 100, y: 100 }, // CS101
-      { id: 2, x: 220, y: 100 }, // CS201
-      { id: 3, x: 100, y: 220 }, // MATH101
-      { id: 4, x: 340, y: 100 }, // CS301
-      { id: 5, x: 220, y: 220 }  // CS202
+      { id: 1, x: 100, y: 100 },
+      { id: 2, x: 250, y: 100 },
+      { id: 3, x: 100, y: 200 },
+      { id: 4, x: 400, y: 100 },
+      { id: 5, x: 250, y: 200 }
     ],
     edges: [
-      { a: 1, b: 2 }, // CS101 -> CS201
-      { a: 1, b: 3 }, // CS101 -> MATH101
-      { a: 2, b: 4 }, // CS201 -> CS301
-      { a: 2, b: 5 }, // CS201 -> CS202
-      { a: 3, b: 5 }  // MATH101 -> CS202
+      { a: 1, b: 2 },
+      { a: 1, b: 3 },
+      { a: 2, b: 4 },
+      { a: 2, b: 5 },
+      { a: 3, b: 5 }
     ]
   });
 

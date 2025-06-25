@@ -6,15 +6,15 @@ import DocsHeader from "../../components/docs/DocsHeader";
 import InteractiveGraph from "../../components/docs/InteractiveGraph";
 
 const DFSPage = () => {
-  // Sample graph for DFS example
+  // Update the sample graph with well-defined positions
   const [graph, setGraph] = useState({
     nodes: [
       { id: 1, x: 100, y: 100 },
-      { id: 2, x: 220, y: 100 },
-      { id: 3, x: 100, y: 220 },
-      { id: 4, x: 220, y: 220 },
-      { id: 5, x: 340, y: 100 },
-      { id: 6, x: 340, y: 220 }
+      { id: 2, x: 250, y: 100 },
+      { id: 3, x: 100, y: 200 },
+      { id: 4, x: 250, y: 200 },
+      { id: 5, x: 400, y: 100 },
+      { id: 6, x: 400, y: 200 }
     ],
     edges: [
       { a: 1, b: 2 },
