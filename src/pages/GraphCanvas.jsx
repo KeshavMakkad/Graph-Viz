@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import Node from "./../components/Node";
 import { BFS } from "../algorithms/BFS";
 import { DFS } from "../algorithms/DFS";
-import { TopoSort } from "../algorithms/TopoSort"; // Add this import
+import { TopoSort } from "../algorithms/TopoSort";
 import { useLocation, Link } from "react-router-dom";
 import "./../styles/pages/GraphCanvas.css";
 import { getTestGraph, getDirectedTestGraph, getTopoSortTestGraph, getTopoSortCyclicTestGraph } from "../utils/testGraph";
 import { getRandomGraph } from "../utils/loadGraph";
+import posthog from 'posthog-js';
 
 const GraphCanvas = () => {
   const location = useLocation();
@@ -169,6 +170,13 @@ const GraphCanvas = () => {
   };
   
   const handleAddNode = () => {
+    // Capture PostHog event
+    posthog.capture('add_node_clicked', {
+      graphType: graphType,
+      nodesCount: nodes.length,
+      edgesCount: edges.length
+    });
+    
     const x = 100 + Math.random() * 400;
     const y = 100 + Math.random() * 400;
     setNodes([...nodes, { id: nextId, x, y }]);
@@ -486,6 +494,13 @@ const GraphCanvas = () => {
   const getNodeById = (id) => nodes.find((n) => n.id === id);
 
   const handleClearGraph = () => {
+    // Capture PostHog event
+    posthog.capture('clear_graph_clicked', {
+      graphType: graphType,
+      nodesCount: nodes.length,
+      edgesCount: edges.length
+    });
+    
     setNodes([]);
     setEdges([]);
     setNextId(1);
@@ -516,15 +531,32 @@ const GraphCanvas = () => {
   
   // Toggle delete mode
   const toggleDeleteMode = () => {
-    setDeleteMode(!deleteMode);
+    const newDeleteMode = !deleteMode;
+    
+    // Capture PostHog event
+    posthog.capture('toggle_delete_mode', {
+      enabled: newDeleteMode,
+      graphType: graphType,
+      nodesCount: nodes.length,
+      edgesCount: edges.length
+    });
+    
+    setDeleteMode(newDeleteMode);
     // When enabling delete mode, deselect any selected node
-    if (!deleteMode) {
+    if (newDeleteMode) {
       setSelectedNodeId(undefined);
     }
   };
 
-  // Add this handler function for loading a random graph
+  // Modified load random graph function with event tracking
   const handleLoadRandomGraph = () => {
+    // Capture PostHog event
+    posthog.capture('load_random_graph_clicked', {
+      graphType: graphType,
+      previousNodesCount: nodes.length,
+      previousEdgesCount: edges.length
+    });
+    
     // Get random graph based on current direction type
     const randomGraph = getRandomGraph(directionType);
     
